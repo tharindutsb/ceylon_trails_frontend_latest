@@ -1,0 +1,21 @@
+name: ceylon_trails
+description: Ceylon Trails MVP
+publish_to: "none"
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  flutter_animate: ^4.5.0     # tiny, smooth micro-animations
+  lottie: ^3.1.2              # confetti / empty states / success
+  glassmorphism: ^3.0.0       # quick frosted cards (optional)
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
