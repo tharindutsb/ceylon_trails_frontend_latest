@@ -8,29 +8,37 @@ import '../../core/seed/locations_seed.dart';
 import '../../core/router/app_router.dart';
 import '../../widgets/animated_gradient_scaffold.dart';
 
-class ReviewPredictPage extends StatelessWidget {
+class ReviewPredictPage extends StatefulWidget {
   const ReviewPredictPage({super.key});
+
+  @override
+  State<ReviewPredictPage> createState() => _ReviewPredictPageState();
+}
+
+class _ReviewPredictPageState extends State<ReviewPredictPage> {
+  String _selectedProvince = 'All';
+  final List<String> _provinces = [
+    'All',
+    'Western',
+    'Central',
+    'Southern',
+    'Northern',
+    'Eastern',
+    'North Western',
+    'North Central',
+    'Uva',
+    'Sabaragamuwa'
+  ];
 
   @override
   Widget build(BuildContext context) {
     final plan = context.watch<PlanProvider>();
-    // prefer route arg, else provider.selected, else seed[0]
-    final arg = ModalRoute.of(context)?.settings.arguments;
-    final loc =
-        (arg is LocationItem) ? arg : (plan.selected ?? kSeedLocations.first);
-
     final group = plan.group;
 
-    // --- Demo “prediction” rules (fast & explainable) ---
-    final analysis = _predict(groupSize: group.people.length, loc: loc);
-
-    // cache for use in schedule (optional)
-    plan.setPrediction(
-      suitable: analysis.suitable,
-      probability: analysis.p,
-      window: analysis.window,
-      recDurationMin: analysis.duration.toDouble(),
-    );
+    // Filter locations by selected province
+    final filteredLocations = _selectedProvince == 'All'
+        ? kSeedLocations
+        : kSeedLocations.where((loc) => loc.city == _selectedProvince).toList();
 
     return AnimatedGradientScaffold(
       appBar: AppBar(
@@ -52,248 +60,400 @@ class ReviewPredictPage extends StatelessWidget {
             stops: const [0.0, 0.5, 1.0],
           ),
         ),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
+        child: Column(
           children: [
-            // Enhanced Hero Image
-            if (loc.imageUrl != null)
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Stack(
-                      children: [
-                        Image.network(loc.imageUrl!, fit: BoxFit.cover),
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.3),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 20),
-
-            // Location Name with better contrast
+            // Province Filter
             Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    loc.name,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _enhancedTag(
-                          locTypeLabel(loc.type), const Color(0xFF4CAF50)),
-                      _enhancedTag('terrain: ${terrainLabel(loc.terrain)}',
-                          const Color(0xFFFF9800)),
-                      _enhancedTag('access: ${accessLabel(loc.access)}',
-                          const Color(0xFF2196F3)),
-                      _enhancedTag('heat: ${heatLabel(loc.heat)}',
-                          const Color(0xFFFF5722)),
-                      _enhancedTag('pref: ${loc.prefStart}–${loc.prefEnd}',
-                          const Color(0xFF6EE7F2)),
-                    ],
-                  ),
-                  if ((loc.desc ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      loc.desc!,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 16,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Enhanced Prediction Card
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.analytics_outlined,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 24,
-                      ),
+                      Icon(Icons.filter_list,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'AI Predictions',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        'Filter by Province',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  _buildPredictionRow(
-                    analysis.suitable
-                        ? Icons.check_circle_outline
-                        : Icons.error_outline,
-                    'Suitability (group)',
-                    '${(analysis.p * 100).toStringAsFixed(0)}% ${analysis.suitable ? 'OK' : 'Not ideal'}',
-                    analysis.suitable
-                        ? const Color(0xFF4CAF50)
-                        : const Color(0xFFFF5722),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildPredictionRow(
-                    Icons.timelapse_outlined,
-                    'Recommended duration',
-                    '${analysis.duration} min',
-                    const Color(0xFF2196F3),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildPredictionRow(
-                    Icons.wb_sunny_outlined,
-                    'Best window',
-                    analysis.window,
-                    const Color(0xFFFF9800),
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _provinces.map((province) {
+                        final isSelected = _selectedProvince == province;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () =>
+                                setState(() => _selectedProvince = province),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.2)
+                                    : Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Text(
+                                province,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.white,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 24),
+            // Locations List
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                itemCount: filteredLocations.length,
+                itemBuilder: (context, index) {
+                  final loc = filteredLocations[index];
+                  final analysis =
+                      _predict(groupSize: group.people.length, loc: loc);
 
-            // Enhanced Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.3)),
-                    ),
-                    child: OutlinedButton.icon(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, AppRoutes.choose),
-                      icon: const Icon(Icons.explore_outlined),
-                      label: const Text('Choose another'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: BorderSide(color: Colors.white.withOpacity(0.3)),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.8),
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: FilledButton.icon(
-                      onPressed: () {
-                        // Add to TripProvider working list
-                        final trips = context.read<TripProvider>();
-                        try {
-                          trips.addStopFromLocation(
-                            loc,
-                            plannedDurationMin: analysis.duration,
-                          );
-                        } catch (_) {
-                          // If your TripProvider doesn't expose addStopFromLocation,
-                          // you can ignore this and let the Schedule page handle adding.
-                        }
-                        Navigator.pushNamed(context, AppRoutes.build);
-                      },
-                      icon: const Icon(Icons.add_task_rounded),
-                      label: const Text('Add to schedule'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  return _buildLocationCard(context, loc, analysis, group);
+                },
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLocationCard(BuildContext context, LocationItem loc,
+      _Prediction analysis, dynamic group) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _showLocationDetails(context, loc, analysis),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Location Image
+                    if (loc.imageUrl != null)
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          image: DecorationImage(
+                            image: NetworkImage(loc.imageUrl!),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.location_on,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24,
+                        ),
+                      ),
+                    const SizedBox(width: 12),
+
+                    // Location Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            loc.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${loc.city ?? 'Unknown'} • ${locTypeLabel(loc.type)}',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.7),
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: [
+                              _buildSmallTag('${loc.prefStart}–${loc.prefEnd}',
+                                  const Color(0xFF6EE7F2)),
+                              _buildSmallTag(terrainLabel(loc.terrain),
+                                  const Color(0xFFFF9800)),
+                              _buildSmallTag(accessLabel(loc.access),
+                                  const Color(0xFF2196F3)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Suitability Indicator
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: analysis.suitable
+                            ? Colors.green.withOpacity(0.2)
+                            : Colors.red.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${(analysis.p * 100).toStringAsFixed(0)}%',
+                        style: TextStyle(
+                          color: analysis.suitable ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+
+                // Prediction Summary
+                Row(
+                  children: [
+                    Icon(Icons.timelapse, color: Colors.white70, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${analysis.duration} min',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(Icons.wb_sunny, color: Colors.white70, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        analysis.window,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.primary,
+                            Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.8),
+                          ],
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final trips = context.read<TripProvider>();
+                          try {
+                            trips.addStopFromLocation(
+                              loc,
+                              plannedDurationMin: analysis.duration,
+                            );
+                          } catch (_) {
+                            // Handle error silently
+                          }
+                          Navigator.pushNamed(context, AppRoutes.build);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child:
+                            const Text('Add', style: TextStyle(fontSize: 12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSmallTag(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  void _showLocationDetails(
+      BuildContext context, LocationItem loc, _Prediction analysis) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1D29),
+        title: Text(
+          loc.name,
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (loc.desc != null) ...[
+              Text(
+                loc.desc!,
+                style: TextStyle(color: Colors.white.withOpacity(0.8)),
+              ),
+              const SizedBox(height: 16),
+            ],
+            _buildDetailRow(
+                'Suitability',
+                '${(analysis.p * 100).toStringAsFixed(0)}% ${analysis.suitable ? 'OK' : 'Not ideal'}',
+                analysis.suitable ? Colors.green : Colors.red),
+            _buildDetailRow(
+                'Duration', '${analysis.duration} min', Colors.blue),
+            _buildDetailRow('Best Time', analysis.window, Colors.orange),
+            _buildDetailRow(
+                'Type', locTypeLabel(loc.type), const Color(0xFF4CAF50)),
+            _buildDetailRow(
+                'Terrain', terrainLabel(loc.terrain), const Color(0xFFFF9800)),
+            _buildDetailRow(
+                'Access', accessLabel(loc.access), const Color(0xFF2196F3)),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              final trips = context.read<TripProvider>();
+              try {
+                trips.addStopFromLocation(
+                  loc,
+                  plannedDurationMin: analysis.duration,
+                );
+              } catch (_) {
+                // Handle error silently
+              }
+              Navigator.pushNamed(context, AppRoutes.build);
+            },
+            child: const Text('Add to Schedule'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 12,
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

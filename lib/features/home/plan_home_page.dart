@@ -99,7 +99,7 @@ class PlanHomePage extends StatelessWidget {
                                         context, AppRoutes.group);
                                   } else {
                                     Navigator.pushNamed(
-                                        context, AppRoutes.tripDuration);
+                                        context, AppRoutes.build);
                                   }
                                 },
                                 icon: const Icon(Icons.auto_awesome_rounded),
@@ -322,9 +322,9 @@ class PlanHomePage extends StatelessWidget {
                 context,
                 Icons.route_rounded,
                 'Build Schedule',
-                'Drag, reorder,\nadjust times',
+                'Create & edit\nyour itinerary',
                 const Color(0xFFFF9800),
-                () => Navigator.pushNamed(context, AppRoutes.schedule),
+                () => Navigator.pushNamed(context, AppRoutes.build),
               ),
               _buildFeatureTile(
                 context,

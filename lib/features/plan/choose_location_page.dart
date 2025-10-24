@@ -16,6 +16,21 @@ class ChooseLocationPage extends StatefulWidget {
 class _ChooseLocationPageState extends State<ChooseLocationPage> {
   String q = '';
   int filterIndex = 0; // 0: all, 1: nature, 2: cultural, 3: religious
+  String selectedProvince = 'All';
+  bool showFavorites = false;
+
+  final List<String> provinces = [
+    'All',
+    'Western',
+    'Central',
+    'Southern',
+    'Northern',
+    'Eastern',
+    'North Western',
+    'North Central',
+    'Uva',
+    'Sabaragamuwa'
+  ];
 
   List<LocationItem> get _filtered {
     final text = q.trim().toLowerCase();
@@ -27,7 +42,9 @@ class _ChooseLocationPageState extends State<ChooseLocationPage> {
     return kSeedLocations.where((e) {
       final okType = filter == null || e.type == filter;
       final okText = text.isEmpty || e.name.toLowerCase().contains(text);
-      return okType && okText;
+      final okProvince =
+          selectedProvince == 'All' || e.city == selectedProvince;
+      return okType && okText && okProvince;
     }).toList();
   }
 
@@ -89,6 +106,75 @@ class _ChooseLocationPageState extends State<ChooseLocationPage> {
             ),
             const SizedBox(height: 20),
 
+            // Province Filter
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.location_city, color: cs.primary, size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Province:',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: provinces.map((province) {
+                          final isSelected = selectedProvince == province;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: GestureDetector(
+                              onTap: () =>
+                                  setState(() => selectedProvince = province),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? cs.primary.withOpacity(0.2)
+                                      : Colors.white.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? cs.primary
+                                        : Colors.white.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  province,
+                                  style: TextStyle(
+                                    color:
+                                        isSelected ? cs.primary : Colors.white,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Enhanced Filter Chips
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -141,22 +227,73 @@ class _ChooseLocationPageState extends State<ChooseLocationPage> {
               const SizedBox(height: 24),
             ],
 
+            // Results Counter
+            if (_filtered.isNotEmpty) ...[
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: cs.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: cs.primary.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search, color: cs.primary, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${_filtered.length} location${_filtered.length == 1 ? '' : 's'} found',
+                      style: TextStyle(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Popular Choices Section
             Row(
               children: [
                 Icon(Icons.location_on, color: cs.primary, size: 24),
                 const SizedBox(width: 8),
                 Text(
-                  'Popular choices',
+                  _filtered.isEmpty ? 'No locations found' : 'Popular choices',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
+                const Spacer(),
+                if (_filtered.isNotEmpty)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${_filtered.length}',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
-            ..._filtered.map((loc) => _buildLocationCard(loc, plan)),
+
+            // Results
+            if (_filtered.isEmpty)
+              _buildEmptyState()
+            else
+              ..._filtered.map((loc) => _buildLocationCard(loc, plan)),
           ],
         ),
       ),
@@ -468,6 +605,64 @@ class _ChooseLocationPageState extends State<ChooseLocationPage> {
       context,
       AppRoutes.review, // show details + predictions there
       arguments: loc,
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_off,
+            size: 64,
+            color: Colors.white.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'No locations found',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your search or filters',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                q = '';
+                filterIndex = 0;
+                selectedProvince = 'All';
+              });
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('Clear Filters'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

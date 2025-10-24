@@ -24,7 +24,12 @@ class AnimatedBottomBar extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: EdgeInsets.only(
+        left: 10,
+        right: 10,
+        top: 8,
+        bottom: MediaQuery.of(context).padding.bottom + 8,
+      ),
       decoration: BoxDecoration(
         color: cs.surface.withOpacity(.60),
         border: Border(top: BorderSide(color: Colors.white.withOpacity(.06))),

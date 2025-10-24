@@ -25,8 +25,8 @@ class CeylonTrailsApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         onGenerateRoute: AppRouter.onGenerateRoute,
-        // Start inside the bottom-nav shell for the demo
-        initialRoute: AppRoutes.shell,
+        // Start with splash screen
+        initialRoute: AppRoutes.splash,
       ),
     );
   }

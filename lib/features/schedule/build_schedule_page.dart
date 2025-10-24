@@ -54,7 +54,8 @@ class BuildSchedulePage extends StatelessWidget {
           ),
         ),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
+          padding: EdgeInsets.fromLTRB(
+              20, 10, 20, MediaQuery.of(context).padding.bottom + 120),
           children: [
             // Day Selection Header
             _buildDayHeader(context),
@@ -115,9 +116,39 @@ class BuildSchedulePage extends StatelessWidget {
                           },
                         ),
                       ),
-                      const SizedBox(width: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTimeSelector(
+                          context,
+                          'End Time',
+                          trips.endHHMM,
+                          Icons.schedule,
+                          () async {
+                            final now = TimeOfDay.now();
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime: _toTimeOfDay(trips.endHHMM) ?? now,
+                            );
+                            if (picked != null && context.mounted) {
+                              final hh = picked.hour.toString().padLeft(2, '0');
+                              final mm =
+                                  picked.minute.toString().padLeft(2, '0');
+                              context.read<TripProvider>().pickEnd('$hh:$mm');
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
                       Expanded(
                         child: _buildBufferSelector(context, buffer),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildMealTimeSelector(context),
                       ),
                     ],
                   ),
@@ -302,6 +333,9 @@ class BuildSchedulePage extends StatelessWidget {
   }
 
   Widget _buildDayHeader(BuildContext context) {
+    final trips = context.watch<TripProvider>();
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -309,47 +343,111 @@ class BuildSchedulePage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Icon(Icons.calendar_today,
-              color: Theme.of(context).colorScheme.primary, size: 24),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              Text(
-                'Trip Day',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 14,
-                ),
+              Icon(Icons.calendar_today, color: cs.primary, size: 24),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Trip Duration',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    '${trips.tripDurationDays} day${trips.tripDurationDays > 1 ? 's' : ''}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                'Today, ${DateTime.now().day} ${_getMonthName(DateTime.now().month)}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              const Spacer(),
+              GestureDetector(
+                onTap: () => _showTripDurationDialog(context),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Edit',
+                    style: TextStyle(
+                      color: cs.primary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 16),
+
+          // Day Selector
+          if (trips.tripDurationDays > 1) ...[
+            Row(
+              children: [
+                Text(
+                  'Current Day:',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: List.generate(trips.tripDurationDays, (index) {
+                        final isSelected = trips.currentDayIndex == index;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () => trips.setCurrentDay(index),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? cs.primary.withOpacity(0.2)
+                                    : Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? cs.primary
+                                      : Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Text(
+                                'Day ${index + 1}',
+                                style: TextStyle(
+                                  color: isSelected ? cs.primary : Colors.white,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            child: Text(
-              'Customize',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );
@@ -490,7 +588,7 @@ class BuildSchedulePage extends StatelessWidget {
                 Row(
                   children: [
                     // Stop Number and Time
-                    Container(
+                    SizedBox(
                       width: 60,
                       child: Column(
                         children: [
@@ -560,7 +658,9 @@ class BuildSchedulePage extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           // Duration Controls
-                          Row(
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
                             children: [
                               Text(
                                 'Duration: ',
@@ -575,7 +675,6 @@ class BuildSchedulePage extends StatelessWidget {
                                   () => context
                                       .read<TripProvider>()
                                       .changeDuration(stop, -5)),
-                              const SizedBox(width: 8),
                               Text(
                                 '${stop.plannedDurationMin} min',
                                 style: const TextStyle(
@@ -584,7 +683,6 @@ class BuildSchedulePage extends StatelessWidget {
                                   fontSize: 12,
                                 ),
                               ),
-                              const SizedBox(width: 8),
                               _buildDurationButton(
                                   context,
                                   Icons.add,
@@ -829,24 +927,6 @@ class BuildSchedulePage extends StatelessWidget {
     );
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return months[month - 1];
-  }
-
   void _autoOptimizeItinerary(BuildContext context) {
     final tripProvider = context.read<TripProvider>();
     final stops = tripProvider.stops;
@@ -983,6 +1063,188 @@ class BuildSchedulePage extends StatelessWidget {
             child: const Text('Got it'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMealTimeSelector(BuildContext context) {
+    final trips = context.watch<TripProvider>();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.restaurant, color: Colors.white70, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'Meal Times',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildMealToggle(context, 'Breakfast', trips.includeBreakfast,
+                  (value) => trips.setIncludeBreakfast(value)),
+              const SizedBox(width: 8),
+              _buildMealToggle(context, 'Lunch', trips.includeLunch,
+                  (value) => trips.setIncludeLunch(value)),
+              const SizedBox(width: 8),
+              _buildMealToggle(context, 'Dinner', trips.includeDinner,
+                  (value) => trips.setIncludeDinner(value)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMealToggle(BuildContext context, String meal, bool isEnabled,
+      Function(bool) onChanged) {
+    return GestureDetector(
+      onTap: () => onChanged(!isEnabled),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isEnabled
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+              : Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isEnabled
+                ? Theme.of(context).colorScheme.primary
+                : Colors.white.withOpacity(0.3),
+          ),
+        ),
+        child: Text(
+          meal,
+          style: TextStyle(
+            color: isEnabled
+                ? Theme.of(context).colorScheme.primary
+                : Colors.white.withOpacity(0.7),
+            fontSize: 10,
+            fontWeight: isEnabled ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showTripDurationDialog(BuildContext context) {
+    final trips = context.read<TripProvider>();
+    int selectedDays = trips.tripDurationDays;
+    DateTime selectedDate = trips.tripStartDate ?? DateTime.now();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (builderContext, setState) => AlertDialog(
+          backgroundColor: const Color(0xFF1A1D29),
+          title: const Text(
+            'Trip Duration',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Date Picker
+              ListTile(
+                leading:
+                    const Icon(Icons.calendar_today, color: Colors.white70),
+                title: const Text(
+                  'Start Date',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                subtitle: Text(
+                  '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: dialogContext,
+                    initialDate: selectedDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked != null) {
+                    setState(() => selectedDate = picked);
+                  }
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Days Selector
+              Row(
+                children: [
+                  const Text(
+                    'Duration:',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: selectedDays > 1
+                              ? () => setState(() => selectedDays--)
+                              : null,
+                          icon: const Icon(Icons.remove, color: Colors.white70),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '$selectedDays day${selectedDays > 1 ? 's' : ''}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: selectedDays < 14
+                              ? () => setState(() => selectedDays++)
+                              : null,
+                          icon: const Icon(Icons.add, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                trips.setTripDuration(selectedDays);
+                trips.setTripStartDate(selectedDate);
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
       ),
     );
   }

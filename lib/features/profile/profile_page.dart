@@ -460,56 +460,37 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _showPersonalInfo(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
+    Navigator.pushNamed(context, AppRoutes.personalInfo);
   }
 
   void _showNotifications(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
+    Navigator.pushNamed(context, AppRoutes.notifications);
   }
 
   void _showLanguageSettings(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
-  }
-
-  void _showPrivacySettings(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
-  }
-
-  void _showLocationSettings(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
-  }
-
-  void _showDataUsage(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
-  }
-
-  void _showHelpCenter(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
-  }
-
-  void _showContactSupport(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
-  }
-
-  void _showBugReport(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
-  }
-
-  void _showAbout(BuildContext context) {
+    // Show language selection dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('About Ceylon Trails'),
-        content: const Column(
+        title: const Text('Language & Region'),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Version: 1.0.0'),
-            SizedBox(height: 8),
-            Text(
-                'Ceylon Trails helps you plan and track your perfect Sri Lankan adventure.'),
-            SizedBox(height: 16),
-            Text('© 2024 Ceylon Trails. All rights reserved.'),
+            ListTile(
+              title: const Text('English'),
+              leading: const Text('🇺🇸'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              title: const Text('සිංහල'),
+              leading: const Text('🇱🇰'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              title: const Text('தமிழ்'),
+              leading: const Text('🇱🇰'),
+              onTap: () => Navigator.pop(context),
+            ),
           ],
         ),
         actions: [
@@ -522,12 +503,168 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
+  void _showPrivacySettings(BuildContext context) {
+    Navigator.pushNamed(context, AppRoutes.privacySettings);
+  }
+
+  void _showLocationSettings(BuildContext context) {
+    // Show location settings dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Location Services'),
+        content: const Text(
+            'Manage your location tracking preferences in your device settings.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDataUsage(BuildContext context) {
+    // Show data usage dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Data Usage'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('App Data: 25.3 MB'),
+            Text('Cache: 12.1 MB'),
+            Text('User Data: 8.7 MB'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Clear Cache'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelpCenter(BuildContext context) {
+    Navigator.pushNamed(context, AppRoutes.helpCenter);
+  }
+
+  void _showContactSupport(BuildContext context) {
+    // Show contact support dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Contact Support'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.email),
+              title: Text('Email Support'),
+              subtitle: Text('support@ceylontrails.com'),
+            ),
+            ListTile(
+              leading: Icon(Icons.phone),
+              title: Text('Phone Support'),
+              subtitle: Text('+94 11 234 5678'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBugReport(BuildContext context) {
+    // Show bug report dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Report a Bug'),
+        content: const TextField(
+          decoration: InputDecoration(
+            hintText: 'Describe the issue you encountered...',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 4,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Bug report submitted!')),
+              );
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAbout(BuildContext context) {
+    Navigator.pushNamed(context, AppRoutes.about);
+  }
+
   void _showTerms(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
+    // Show terms dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Terms of Service'),
+        content: const SingleChildScrollView(
+          child: Text(
+            'Terms of Service content would go here. This is a placeholder for the actual terms and conditions.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPrivacyPolicy(BuildContext context) {
-    Navigator.pushNamed(context, AppRoutes.overview); // Placeholder
+    // Show privacy policy dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Privacy Policy'),
+        content: const SingleChildScrollView(
+          child: Text(
+            'Privacy Policy content would go here. This is a placeholder for the actual privacy policy.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSignIn(BuildContext context) {

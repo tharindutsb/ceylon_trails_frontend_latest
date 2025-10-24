@@ -49,73 +49,136 @@ class _SplashPageState extends State<SplashPage> {
 }
 
 /// ---------------------------------------------------------------------------
-/// Sign-in screen (Google button + Guest).
-/// Google button is wired for DEMO (mock); you can swap to real google_sign_in.
+/// Welcome screen with sign in/sign up options and guest mode.
 /// ---------------------------------------------------------------------------
-class SignInPage extends StatelessWidget {
+class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
+
+  @override
+  State<SignInPage> createState() => _SignInPageState();
+}
+
+class _SignInPageState extends State<SignInPage> {
+  bool _isSignUp = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedGradientScaffold(
       appBar: AppBar(
-        title: const Text('Welcome'),
+        title: Text(_isSignUp ? 'Create Account' : 'Welcome Back'),
         centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         children: [
-          const SizedBox(height: 10),
-          GlassCard(
-            padding: const EdgeInsets.all(20),
+          // Hero Section
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
             child: Column(
               children: [
-                const Text(
-                  'Plan beautiful day trips across Sri Lanka',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Discover places, check suitability for your group,\n'
-                  'and build a smart schedule in minutes.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70),
+                Icon(
+                  Icons.route_rounded,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(height: 16),
+                Text(
+                  'Ceylon Trails',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Plan beautiful day trips across Sri Lanka',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 _FeatureRow(
                   icon: Icons.explore_rounded,
-                  text: 'Curated locations and categories',
+                  text: 'Discover amazing locations',
                 ),
                 const SizedBox(height: 8),
                 _FeatureRow(
-                  icon: Icons.check_circle_outline,
-                  text: 'Simple, explainable predictions',
+                  icon: Icons.analytics_outlined,
+                  text: 'AI-powered trip predictions',
                 ),
                 const SizedBox(height: 8),
                 _FeatureRow(
-                  icon: Icons.event_note_rounded,
-                  text: 'Drag-and-drop schedule builder',
+                  icon: Icons.schedule_rounded,
+                  text: 'Smart itinerary planning',
                 ),
               ],
             ),
           ),
 
+          const SizedBox(height: 32),
+
+          // Auth Form
+          if (_isSignUp) ...[
+            _buildSignUpForm(),
+          ] else ...[
+            _buildSignInForm(),
+          ],
+
           const SizedBox(height: 24),
 
-          // Google sign-in (mock in demo)
+          // Google sign-in
           _GoogleButton(
-            onTap: () async {
-              // TODO: integrate real google_sign_in here.
-              // For demo, pretend success and go to app shell.
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Signed in with Google (demo)')),
-              );
-              Navigator.pushReplacementNamed(context, AppRoutes.shell);
-            },
+            onTap: _handleGoogleSignIn,
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+
+          // Toggle between sign in and sign up
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _isSignUp
+                    ? 'Already have an account? '
+                    : "Don't have an account? ",
+                style: TextStyle(color: Colors.white.withOpacity(0.7)),
+              ),
+              GestureDetector(
+                onTap: () => setState(() => _isSignUp = !_isSignUp),
+                child: Text(
+                  _isSignUp ? 'Sign In' : 'Sign Up',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
 
           // Continue as guest
           OutlinedButton.icon(
@@ -123,18 +186,244 @@ class SignInPage extends StatelessWidget {
               Navigator.pushReplacementNamed(context, AppRoutes.shell);
             },
             icon: const Icon(Icons.lock_open_rounded),
-            label: const Text('Continue as guest'),
+            label: const Text('Continue as Guest'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.white,
+              side: BorderSide(color: Colors.white.withOpacity(0.3)),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
 
-          const SizedBox(height: 26),
+          const SizedBox(height: 32),
 
-          // Tiny legal
+          // Legal text
           Text(
-            'By continuing you agree to the Terms & Privacy Policy.',
+            'By continuing you agree to our Terms of Service and Privacy Policy.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white.withOpacity(.6), fontSize: 12),
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 12,
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSignInForm() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          _buildTextField(
+            controller: _emailController,
+            label: 'Email',
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _passwordController,
+            label: 'Password',
+            icon: Icons.lock_outlined,
+            obscureText: true,
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleEmailSignIn,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      ),
+                    )
+                  : const Text(
+                      'Sign In',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignUpForm() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          _buildTextField(
+            controller: _nameController,
+            label: 'Full Name',
+            icon: Icons.person_outlined,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _emailController,
+            label: 'Email',
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 16),
+          _buildTextField(
+            controller: _passwordController,
+            label: 'Password',
+            icon: Icons.lock_outlined,
+            obscureText: true,
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleEmailSignUp,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                      ),
+                    )
+                  : const Text(
+                      'Create Account',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        prefixIcon: Icon(icon, color: Colors.white.withOpacity(0.7)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleEmailSignIn() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showError('Please fill in all fields');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    // Simulate API call
+    await Future.delayed(const Duration(seconds: 2));
+
+    setState(() => _isLoading = false);
+
+    // For demo, always succeed
+    _showSuccess('Signed in successfully!');
+    Navigator.pushReplacementNamed(context, AppRoutes.shell);
+  }
+
+  Future<void> _handleEmailSignUp() async {
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      _showError('Please fill in all fields');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    // Simulate API call
+    await Future.delayed(const Duration(seconds: 2));
+
+    setState(() => _isLoading = false);
+
+    // For demo, always succeed
+    _showSuccess('Account created successfully!');
+    Navigator.pushReplacementNamed(context, AppRoutes.shell);
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    // TODO: integrate real google_sign_in here.
+    // For demo, pretend success and go to app shell.
+    _showSuccess('Signed in with Google!');
+    Navigator.pushReplacementNamed(context, AppRoutes.shell);
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
       ),
     );
   }

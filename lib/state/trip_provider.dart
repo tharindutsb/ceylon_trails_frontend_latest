@@ -34,9 +34,21 @@ class TripProvider extends ChangeNotifier {
   // Multi-day getters
   DateTime? get tripStartDate => _tripStartDate;
   int get totalDays => _totalDays;
+  int get tripDurationDays => _totalDays;
+  int get currentDayIndex => 0; // For now, always show day 1
+  String get endHHMM => _dailyEndTimes[1] ?? '18:00';
   Map<int, List<TripStop>> get dailyStops => Map.unmodifiable(_dailyStops);
   Map<int, String> get dailyStartTimes => Map.unmodifiable(_dailyStartTimes);
   Map<int, String> get dailyEndTimes => Map.unmodifiable(_dailyEndTimes);
+
+  // Meal time settings
+  bool _includeBreakfast = true;
+  bool _includeLunch = true;
+  bool _includeDinner = true;
+
+  bool get includeBreakfast => _includeBreakfast;
+  bool get includeLunch => _includeLunch;
+  bool get includeDinner => _includeDinner;
 
   // ---------- Mutations on working plan ----------
 
@@ -318,5 +330,55 @@ class TripProvider extends ChangeNotifier {
         cursor += _bufferMin;
       }
     }
+  }
+
+  // ---------- Additional methods for build schedule page ----------
+
+  /// Pick a new end time (HH:MM)
+  void pickEnd(String hhmm) {
+    _dailyEndTimes[1] = hhmm;
+    notifyListeners();
+  }
+
+  /// Set trip duration in days
+  void setTripDuration(int days) {
+    _totalDays = days.clamp(1, 14);
+
+    // Initialize daily times if not set
+    for (int day = 1; day <= _totalDays; day++) {
+      _dailyStartTimes[day] ??= '08:00';
+      _dailyEndTimes[day] ??= '18:00';
+      _dailyStops[day] ??= [];
+    }
+
+    notifyListeners();
+  }
+
+  /// Set trip start date
+  void setTripStartDate(DateTime date) {
+    _tripStartDate = date;
+    notifyListeners();
+  }
+
+  /// Set current day index
+  void setCurrentDay(int dayIndex) {
+    // For now, this is a placeholder since we're showing day 1
+    notifyListeners();
+  }
+
+  /// Set meal time preferences
+  void setIncludeBreakfast(bool include) {
+    _includeBreakfast = include;
+    notifyListeners();
+  }
+
+  void setIncludeLunch(bool include) {
+    _includeLunch = include;
+    notifyListeners();
+  }
+
+  void setIncludeDinner(bool include) {
+    _includeDinner = include;
+    notifyListeners();
   }
 }
