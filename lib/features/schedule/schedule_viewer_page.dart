@@ -688,10 +688,19 @@ class _ScheduleViewerPageState extends State<ScheduleViewerPage> {
                       ),
                     );
                   } else {
+                    // Complete the trip - fill progress to 100%
+                    setState(() {
+                      _currentStopIndex = trip.stops.length;
+                    });
+
+                    // Move trip to past trips
+                    final trips = context.read<TripProvider>();
+                    trips.completeCurrentTrip();
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Trip completed!'),
-                        backgroundColor: Colors.blue,
+                        content: Text('Trip completed! Moved to past trips.'),
+                        backgroundColor: Colors.green,
                       ),
                     );
                   }

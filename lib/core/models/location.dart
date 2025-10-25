@@ -68,6 +68,7 @@ class LocationItem {
   final String? desc;
   final String? imageUrl;
   final double? rating;
+  final int? voteCount;
   final String? city;
 
   /// A suggested duration you might show in Review & Predict (minutes)
@@ -85,6 +86,7 @@ class LocationItem {
     this.desc,
     this.imageUrl,
     this.rating,
+    this.voteCount,
     this.city,
     this.suggestedDurationMin = 90,
   });
@@ -101,6 +103,7 @@ class LocationItem {
     String? desc,
     String? imageUrl,
     double? rating,
+    int? voteCount,
     String? city,
     int? suggestedDurationMin,
   }) {
@@ -116,6 +119,7 @@ class LocationItem {
       desc: desc ?? this.desc,
       imageUrl: imageUrl ?? this.imageUrl,
       rating: rating ?? this.rating,
+      voteCount: voteCount ?? this.voteCount,
       city: city ?? this.city,
       suggestedDurationMin: suggestedDurationMin ?? this.suggestedDurationMin,
     );
@@ -133,6 +137,7 @@ class LocationItem {
         'desc': desc,
         'imageUrl': imageUrl,
         'rating': rating,
+        'voteCount': voteCount,
         'city': city,
         'suggestedDurationMin': suggestedDurationMin,
       };
@@ -149,6 +154,7 @@ class LocationItem {
         desc: m['desc'] as String?,
         imageUrl: m['imageUrl'] as String?,
         rating: (m['rating'] as num?)?.toDouble(),
+        voteCount: (m['voteCount'] as num?)?.toInt(),
         city: m['city'] as String?,
         suggestedDurationMin:
             (m['suggestedDurationMin'] as num?)?.toInt() ?? 90,

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/router/app_router.dart';
 import '../../core/seed/locations_seed.dart';
 import '../../core/models/location.dart';
 import '../../state/plan_provider.dart';
 import '../../widgets/animated_gradient_scaffold.dart';
+import '../../widgets/location_details_popup.dart';
 
 class ChooseLocationPage extends StatefulWidget {
   const ChooseLocationPage({super.key});
@@ -425,6 +425,33 @@ class _ChooseLocationPageState extends State<ChooseLocationPage> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${loc.rating?.toStringAsFixed(1) ?? '4.5'}',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '(${loc.voteCount ?? 0} votes)',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
@@ -547,6 +574,33 @@ class _ChooseLocationPageState extends State<ChooseLocationPage> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${loc.rating?.toStringAsFixed(1) ?? '4.5'}',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '(${loc.voteCount ?? 0} votes)',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.6),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -597,14 +651,17 @@ class _ChooseLocationPageState extends State<ChooseLocationPage> {
 
   void _select(PlanProvider plan, LocationItem loc) {
     plan.setSelected(loc); // remember selection
-    Navigator.pushNamed(context, AppRoutes.review); // go to review/predict
+    _showLocationDetails(context, loc);
   }
 
   void _openDetails(BuildContext context, PlanProvider plan, LocationItem loc) {
-    Navigator.pushNamed(
-      context,
-      AppRoutes.review, // show details + predictions there
-      arguments: loc,
+    _showLocationDetails(context, loc);
+  }
+
+  void _showLocationDetails(BuildContext context, LocationItem loc) {
+    showDialog(
+      context: context,
+      builder: (context) => LocationDetailsPopup(location: loc),
     );
   }
 

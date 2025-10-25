@@ -25,11 +25,15 @@ class TripProvider extends ChangeNotifier {
   // ------- Saved trip (read-only snapshot) -------
   Trip? _currentTrip;
 
+  // ------- Past trips -------
+  final List<Trip> _pastTrips = [];
+
   // Getters
   String get startHHMM => _startHHMM;
   int get bufferMin => _bufferMin;
   List<TripStop> get stops => List.unmodifiable(_stops);
   Trip? get currentTrip => _currentTrip;
+  List<Trip> get pastTrips => List.unmodifiable(_pastTrips);
 
   // Multi-day getters
   DateTime? get tripStartDate => _tripStartDate;
@@ -379,6 +383,37 @@ class TripProvider extends ChangeNotifier {
 
   void setIncludeDinner(bool include) {
     _includeDinner = include;
+    notifyListeners();
+  }
+
+  // ---------- Trip completion and past trips management ----------
+
+  /// Complete the current trip and move it to past trips
+  void completeCurrentTrip() {
+    if (_currentTrip != null) {
+      _pastTrips.add(_currentTrip!);
+      _currentTrip = null;
+      notifyListeners();
+    }
+  }
+
+  /// Delete a past trip by index
+  void deletePastTrip(int index) {
+    if (index >= 0 && index < _pastTrips.length) {
+      _pastTrips.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  /// Delete the current trip
+  void deleteCurrentTrip() {
+    _currentTrip = null;
+    notifyListeners();
+  }
+
+  /// Clear all past trips
+  void clearPastTrips() {
+    _pastTrips.clear();
     notifyListeners();
   }
 }

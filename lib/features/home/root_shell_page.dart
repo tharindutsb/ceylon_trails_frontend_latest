@@ -28,21 +28,28 @@ class _RootShellPageState extends State<RootShellPage> {
       const ProfilePage(), // Profile
     ];
 
-    return AnimatedGradientScaffold(
-      appBar: AppBar(
-        title: Text(_titles[_index]),
-        actions: [
-          IconButton(
-            tooltip: 'Notifications',
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none_rounded),
-          ),
-        ],
-      ),
-      body: pages[_index],
-      bottomNav: AnimatedBottomBar(
-        index: _index,
-        onChanged: (i) => setState(() => _index = i),
+    return WillPopScope(
+      onWillPop: () async {
+        // Lock navigation - prevent back button from changing tabs
+        return false;
+      },
+      child: AnimatedGradientScaffold(
+        appBar: AppBar(
+          title: Text(_titles[_index]),
+          automaticallyImplyLeading: false, // Remove back button
+          actions: [
+            IconButton(
+              tooltip: 'Notifications',
+              onPressed: () {},
+              icon: const Icon(Icons.notifications_none_rounded),
+            ),
+          ],
+        ),
+        body: pages[_index],
+        bottomNav: AnimatedBottomBar(
+          index: _index,
+          onChanged: (i) => setState(() => _index = i),
+        ),
       ),
     );
   }

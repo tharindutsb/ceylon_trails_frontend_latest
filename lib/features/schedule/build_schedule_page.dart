@@ -141,15 +141,12 @@ class BuildSchedulePage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Row(
+                  // Use Column for better responsive layout
+                  Column(
                     children: [
-                      Expanded(
-                        child: _buildBufferSelector(context, buffer),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildMealTimeSelector(context),
-                      ),
+                      _buildBufferSelector(context, buffer),
+                      const SizedBox(height: 16),
+                      _buildMealTimeSelector(context),
                     ],
                   ),
                 ],
@@ -1093,14 +1090,15 @@ class BuildSchedulePage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
+          // Use Wrap for better responsive layout
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               _buildMealToggle(context, 'Breakfast', trips.includeBreakfast,
                   (value) => trips.setIncludeBreakfast(value)),
-              const SizedBox(width: 8),
               _buildMealToggle(context, 'Lunch', trips.includeLunch,
                   (value) => trips.setIncludeLunch(value)),
-              const SizedBox(width: 8),
               _buildMealToggle(context, 'Dinner', trips.includeDinner,
                   (value) => trips.setIncludeDinner(value)),
             ],

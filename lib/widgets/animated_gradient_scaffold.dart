@@ -52,9 +52,48 @@ class AnimatedGradientScaffold extends StatelessWidget {
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: appBar,
-          body: body,
-          bottomNavigationBar: bottomNav,
+          extendBody: true, // Extend body behind bottom navigation
+          extendBodyBehindAppBar: true, // Extend body behind app bar
+          appBar: appBar != null
+              ? PreferredSize(
+                  preferredSize: appBar!.preferredSize,
+                  child: SafeArea(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            const Color(0xFF1A1D29).withOpacity(0.9),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: appBar!,
+                    ),
+                  ),
+                )
+              : null,
+          body: SafeArea(
+            child: body,
+          ),
+          bottomNavigationBar: bottomNav != null
+              ? Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        const Color(0xFF1A1D29).withOpacity(0.9),
+                      ],
+                    ),
+                  ),
+                  child: SafeArea(
+                    child: bottomNav!,
+                  ),
+                )
+              : null,
           floatingActionButton: fab,
         ),
       ],

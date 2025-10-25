@@ -21,6 +21,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=1600',
     rating: 4.6,
+    voteCount: 1247,
     city: 'Kandy',
     suggestedDurationMin: 90,
   ),
@@ -38,6 +39,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=1600',
     rating: 4.8,
+    voteCount: 2156,
     city: 'Kandy',
     suggestedDurationMin: 78,
   ),
@@ -55,6 +57,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=1600',
     rating: 4.5,
+    voteCount: 892,
     city: 'Kandy',
     suggestedDurationMin: 68,
   ),
@@ -72,6 +75,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1483794344563-d27a8d18014e?q=80&w=1600',
     rating: 4.3,
+    voteCount: 634,
     city: 'Kandy',
     suggestedDurationMin: 80,
   ),
@@ -89,6 +93,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=1600',
     rating: 4.7,
+    voteCount: 1456,
     city: 'Kandy',
     suggestedDurationMin: 60,
   ),
@@ -106,6 +111,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1520975858868-6d69b983c6e8?q=80&w=1600',
     rating: 4.4,
+    voteCount: 723,
     city: 'Kandy',
     suggestedDurationMin: 75,
   ),
@@ -125,6 +131,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1600059832058-5b5503fcd1da?q=80&w=1600',
     rating: 4.8,
+    voteCount: 3245,
     city: 'Sigiriya',
     suggestedDurationMin: 120,
   ),
@@ -142,6 +149,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1591604466107-ec97de577aff?q=80&w=1600',
     rating: 4.7,
+    voteCount: 1876,
     city: 'Sigiriya',
     suggestedDurationMin: 100,
   ),
@@ -159,6 +167,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1566511443741-b0b8a2a4e8d2?q=80&w=1600',
     rating: 4.6,
+    voteCount: 1567,
     city: 'Dambulla',
     suggestedDurationMin: 90,
   ),
@@ -178,6 +187,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1593175278720-9b5f8d8eabe3?q=80&w=1600',
     rating: 4.7,
+    voteCount: 2134,
     city: 'Galle',
     suggestedDurationMin: 75,
   ),
@@ -195,6 +205,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1600',
     rating: 4.5,
+    voteCount: 1789,
     city: 'Galle',
     suggestedDurationMin: 120,
   ),
@@ -212,6 +223,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1545420331-8cf36410d3f3?q=80&w=1600',
     rating: 4.3,
+    voteCount: 456,
     city: 'Galle',
     suggestedDurationMin: 90,
   ),
@@ -231,6 +243,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1527596428171-e04c408e060b?q=80&w=1600',
     rating: 4.4,
+    voteCount: 987,
     city: 'Colombo',
     suggestedDurationMin: 60,
   ),
@@ -247,6 +260,7 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     imageUrl:
         'https://images.unsplash.com/photo-1482192505345-5655af888cc4?q=80&w=1600',
     rating: 4.3,
+    voteCount: 1234,
     city: 'Colombo',
     suggestedDurationMin: 60,
   ),
@@ -259,10 +273,11 @@ final List<LocationItem> kSeedLocations = <LocationItem>[
     heat: Heat.low,
     prefStart: '10:00',
     prefEnd: '16:00',
-    desc: 'Sri Lanka’s largest museum with art and archaeology collections.',
+    desc: 'Sri Lanka\'s largest museum with art and archaeology collections.',
     imageUrl:
         'https://images.unsplash.com/photo-1563720223185-11003d5163f3?q=80&w=1600',
     rating: 4.4,
+    voteCount: 1567,
     city: 'Colombo',
     suggestedDurationMin: 80,
   ),
