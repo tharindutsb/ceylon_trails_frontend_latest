@@ -341,142 +341,289 @@ class PlanHomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildWeatherCard(BuildContext context, ColorScheme cs) {
-    final weather = WeatherService.getCurrentWeather();
-    final alerts = WeatherService.getWeatherAlerts();
+  // Widget _buildWeatherCard(BuildContext context, ColorScheme cs) {
+  //   final weather = WeatherService.getCurrentWeather();
+  //   final alerts = WeatherService.getWeatherAlerts();
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.wb_sunny, color: cs.primary, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'Weather Today',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const Spacer(),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: weather.isGoodForTravel
-                      ? Colors.green.withOpacity(0.2)
-                      : Colors.orange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  weather.isGoodForTravel
-                      ? 'Good for travel'
-                      : 'Check conditions',
-                  style: TextStyle(
-                    color:
-                        weather.isGoodForTravel ? Colors.green : Colors.orange,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
+  //   return Container(
+  //     padding: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white.withOpacity(0.1),
+  //       borderRadius: BorderRadius.circular(16),
+  //       border: Border.all(color: Colors.white.withOpacity(0.2)),
+  //       boxShadow: [
+  //         BoxShadow(
+  //           color: Colors.black.withOpacity(0.1),
+  //           blurRadius: 10,
+  //           offset: const Offset(0, 4),
+  //         ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Icon(Icons.wb_sunny, color: cs.primary, size: 24),
+  //             const SizedBox(width: 8),
+  //             Text(
+  //               'Weather Today',
+  //               style: Theme.of(context).textTheme.titleLarge?.copyWith(
+  //                     color: Colors.white,
+  //                     fontWeight: FontWeight.bold,
+  //                   ),
+  //             ),
+  //             const Spacer(),
+  //             Container(
+  //               padding:
+  //                   const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  //               decoration: BoxDecoration(
+  //                 color: weather.isGoodForTravel
+  //                     ? Colors.green.withOpacity(0.2)
+  //                     : Colors.orange.withOpacity(0.2),
+  //                 borderRadius: BorderRadius.circular(12),
+  //               ),
+  //               child: Text(
+  //                 weather.isGoodForTravel
+  //                     ? 'Good for travel'
+  //                     : 'Check conditions',
+  //                 style: TextStyle(
+  //                   color:
+  //                       weather.isGoodForTravel ? Colors.green : Colors.orange,
+  //                   fontWeight: FontWeight.w600,
+  //                   fontSize: 12,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Row(
+  //           children: [
+  //             // Weather condition
+  //             Expanded(
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Text(
+  //                     weather.condition,
+  //                     style: const TextStyle(
+  //                       color: Colors.white,
+  //                       fontSize: 18,
+  //                       fontWeight: FontWeight.bold,
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 4),
+  //                   Text(
+  //                     '${weather.temperature}°C • ${weather.humidity}% humidity',
+  //                     style: TextStyle(
+  //                       color: Colors.white.withOpacity(0.8),
+  //                       fontSize: 14,
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             // Weather icon
+  //             Container(
+  //               padding: const EdgeInsets.all(12),
+  //               decoration: BoxDecoration(
+  //                 color: cs.primary.withOpacity(0.2),
+  //                 borderRadius: BorderRadius.circular(12),
+  //               ),
+  //               child: Icon(
+  //                 _getWeatherIcon(weather.condition),
+  //                 color: cs.primary,
+  //                 size: 32,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         if (alerts.isNotEmpty) ...[
+  //           const SizedBox(height: 16),
+  //           Container(
+  //             padding: const EdgeInsets.all(12),
+  //             decoration: BoxDecoration(
+  //               color: Colors.orange.withOpacity(0.1),
+  //               borderRadius: BorderRadius.circular(8),
+  //               border: Border.all(color: Colors.orange.withOpacity(0.3)),
+  //             ),
+  //             child: Row(
+  //               children: [
+  //                 Icon(Icons.warning, color: Colors.orange, size: 20),
+  //                 const SizedBox(width: 8),
+  //                 Expanded(
+  //                   child: Text(
+  //                     alerts.first.message,
+  //                     style: TextStyle(
+  //                       color: Colors.orange,
+  //                       fontSize: 12,
+  //                       fontWeight: FontWeight.w600,
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //         const SizedBox(height: 12),
+  //         Text(
+  //           weather.recommendation,
+  //           style: TextStyle(
+  //             color: Colors.white.withOpacity(0.8),
+  //             fontSize: 12,
+  //             fontStyle: FontStyle.italic,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  Widget _buildWeatherCard(BuildContext context, ColorScheme cs) {
+    return FutureBuilder<WeatherData>(
+      // Use device GPS. If you prefer a fixed place:
+      // future: WeatherService.fetchCurrentWeather(lat: 7.2906, lon: 80.6337),
+      future: WeatherService.fetchCurrentForDevice(),
+      builder: (context, snap) {
+        // Fallback to simulated data while loading/error
+        final weather = snap.data ?? WeatherService.getCurrentWeather();
+        final alerts = WeatherService.getWeatherAlerts();
+
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withOpacity(0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Weather condition
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      weather.condition,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${weather.temperature}°C • ${weather.humidity}% humidity',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Weather icon
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: cs.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getWeatherIcon(weather.condition),
-                  color: cs.primary,
-                  size: 32,
-                ),
-              ),
-            ],
-          ),
-          if (alerts.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
-              ),
-              child: Row(
+              Row(
                 children: [
-                  Icon(Icons.warning, color: Colors.orange, size: 20),
+                  Icon(Icons.wb_sunny, color: cs.primary, size: 24),
                   const SizedBox(width: 8),
-                  Expanded(
+                  Text(
+                    'Weather Today',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: weather.isGoodForTravel
+                          ? Colors.green.withOpacity(0.2)
+                          : Colors.orange.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Text(
-                      alerts.first.message,
+                      weather.isGoodForTravel
+                          ? 'Good for travel'
+                          : 'Check conditions',
                       style: TextStyle(
-                        color: Colors.orange,
-                        fontSize: 12,
+                        color: weather.isGoodForTravel
+                            ? Colors.green
+                            : Colors.orange,
                         fontWeight: FontWeight.w600,
+                        fontSize: 12,
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          Text(
-            weather.recommendation,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-            ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  // Weather condition + stats
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          weather.condition,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${weather.temperature}°C • ${weather.humidity}% humidity',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Icon badge
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      _getWeatherIcon(weather.condition),
+                      color: cs.primary,
+                      size: 32,
+                    ),
+                  ),
+                ],
+              ),
+              if (alerts.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning, color: Colors.orange, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          alerts.first.message,
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 12),
+              Text(
+                weather.recommendation,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

@@ -10,7 +10,9 @@ dependencies:
   provider: ^6.1.2
   flutter_animate: ^4.5.0     # tiny, smooth micro-animations
   lottie: ^3.1.2              # confetti / empty states / success
-  glassmorphism: ^3.0.0       # quick frosted cards (optional)
+  glassmorphism: ^3.0.0    
+  http: ^1.2.0
+  geolocator: ^13.0.1   # quick frosted cards (optional)
 
 dev_dependencies:
   flutter_test:

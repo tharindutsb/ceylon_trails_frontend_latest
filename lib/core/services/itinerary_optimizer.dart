@@ -29,20 +29,51 @@ class ItineraryOptimizer {
     return hour * 60 + minute;
   }
 
-  /// Create optimized schedule for a day
+  /// Create optimized schedule for a day with meal times
   static List<ScheduleItem> createDailySchedule({
     required List<LocationItem> locations,
     required String startTime,
     required int bufferMinutes,
+    bool includeBreakfast = true,
+    bool includeLunch = true,
+    bool includeDinner = true,
+    required String endTime,
   }) {
     if (locations.isEmpty) return [];
 
     final optimizedLocations = optimizeItinerary(locations);
     final schedule = <ScheduleItem>[];
     var currentTime = _parseTime(startTime);
+    final endTimeMinutes = _parseTime(endTime);
+
+    // Meal time configuration
+    const breakfastDuration = 30; // 30 minutes
+    const lunchDuration = 45; // 45 minutes
+    const dinnerDuration = 60; // 60 minutes
+
+    // Calculate meal times
+    final breakfastTime = currentTime;
+    final lunchTime = currentTime + (endTimeMinutes - currentTime) ~/ 2;
+    final dinnerTime = endTimeMinutes - dinnerDuration;
 
     for (int i = 0; i < optimizedLocations.length; i++) {
       final location = optimizedLocations[i];
+
+      // Check if breakfast is needed at the start
+      if (includeBreakfast &&
+          i == 0 &&
+          currentTime <= breakfastTime + breakfastDuration) {
+        schedule.add(ScheduleItem(
+          location: null, // meal items don't have location
+          arrivalTime: _formatTime(breakfastTime),
+          departureTime: _formatTime(breakfastTime + breakfastDuration),
+          visitDuration: breakfastDuration,
+          order: schedule.length + 1,
+          isMeal: true,
+          mealType: 'Breakfast',
+        ));
+        currentTime = breakfastTime + breakfastDuration;
+      }
 
       // Calculate arrival time
       final arrivalTime = _formatTime(currentTime);
@@ -53,13 +84,31 @@ class ItineraryOptimizer {
       // Calculate departure time
       final departureTime = currentTime + visitDuration;
 
-      // Add to schedule
+      // Check if we need lunch here
+      if (includeLunch &&
+          currentTime <= lunchTime &&
+          (currentTime + visitDuration) > lunchTime) {
+        final lunchTimeIndex =
+            currentTime > lunchTime ? currentTime : lunchTime;
+        schedule.add(ScheduleItem(
+          location: null,
+          arrivalTime: _formatTime(lunchTimeIndex),
+          departureTime: _formatTime(lunchTimeIndex + lunchDuration),
+          visitDuration: lunchDuration,
+          order: schedule.length + 1,
+          isMeal: true,
+          mealType: 'Lunch',
+        ));
+        currentTime = lunchTimeIndex + lunchDuration;
+      }
+
+      // Add location to schedule
       schedule.add(ScheduleItem(
         location: location,
         arrivalTime: arrivalTime,
         departureTime: _formatTime(departureTime),
         visitDuration: visitDuration,
-        order: i + 1,
+        order: schedule.length + 1,
       ));
 
       // Add travel time to next location (if not last)
@@ -67,6 +116,19 @@ class ItineraryOptimizer {
         final nextLocation = optimizedLocations[i + 1];
         final travelTime = _estimateTravelTime(location, nextLocation);
         currentTime = departureTime + travelTime + bufferMinutes;
+      }
+
+      // Check if we need dinner at the end
+      if (includeDinner && i == optimizedLocations.length - 1) {
+        schedule.add(ScheduleItem(
+          location: null,
+          arrivalTime: _formatTime(dinnerTime),
+          departureTime: _formatTime(dinnerTime + dinnerDuration),
+          visitDuration: dinnerDuration,
+          order: schedule.length + 1,
+          isMeal: true,
+          mealType: 'Dinner',
+        ));
       }
     }
 
@@ -90,9 +152,10 @@ class ItineraryOptimizer {
   /// Check if schedule is feasible within preferred time windows
   static bool isScheduleFeasible(List<ScheduleItem> schedule) {
     for (final item in schedule) {
+      if (item.location == null) continue;
       final arrivalTime = _parseTime(item.arrivalTime);
-      final preferredStart = _parseTime(item.location.prefStart);
-      final preferredEnd = _parseTime(item.location.prefEnd);
+      final preferredStart = _parseTime(item.location!.prefStart);
+      final preferredEnd = _parseTime(item.location!.prefEnd);
 
       // Check if arrival time is within preferred window
       if (arrivalTime < preferredStart || arrivalTime > preferredEnd) {
@@ -107,16 +170,17 @@ class ItineraryOptimizer {
     final suggestions = <String>[];
 
     for (final item in schedule) {
+      if (item.location == null) continue;
       final arrivalTime = _parseTime(item.arrivalTime);
-      final preferredStart = _parseTime(item.location.prefStart);
-      final preferredEnd = _parseTime(item.location.prefEnd);
+      final preferredStart = _parseTime(item.location!.prefStart);
+      final preferredEnd = _parseTime(item.location!.prefEnd);
 
       if (arrivalTime < preferredStart) {
         suggestions.add(
-            '${item.location.name}: Consider starting later to match preferred time');
+            '${item.location!.name}: Consider starting later to match preferred time');
       } else if (arrivalTime > preferredEnd) {
         suggestions.add(
-            '${item.location.name}: Consider starting earlier to match preferred time');
+            '${item.location!.name}: Consider starting earlier to match preferred time');
       }
     }
 
@@ -136,11 +200,13 @@ class ItineraryOptimizer {
 
 /// Represents a scheduled item in the itinerary
 class ScheduleItem {
-  final LocationItem location;
+  final LocationItem? location;
   final String arrivalTime;
   final String departureTime;
   final int visitDuration;
   final int order;
+  final bool isMeal;
+  final String? mealType;
 
   ScheduleItem({
     required this.location,
@@ -148,10 +214,16 @@ class ScheduleItem {
     required this.departureTime,
     required this.visitDuration,
     required this.order,
+    this.isMeal = false,
+    this.mealType,
   });
+
+  String get name => isMeal ? mealType ?? 'Meal' : location?.name ?? 'Unknown';
+
+  String get type => isMeal ? 'meal' : 'location';
 
   @override
   String toString() {
-    return 'ScheduleItem(${location.name}: $arrivalTime - $departureTime)';
+    return 'ScheduleItem($name: $arrivalTime - $departureTime)';
   }
 }

@@ -216,6 +216,7 @@ class TripProvider extends ChangeNotifier {
       locations: optimizedLocations,
       startTime: startTime,
       bufferMinutes: _bufferMin,
+      endTime: _dailyEndTimes[day] ?? '18:00',
     );
 
     // Update stops with optimized times
@@ -223,7 +224,7 @@ class TripProvider extends ChangeNotifier {
     for (int i = 0; i < schedule.length; i++) {
       final scheduleItem = schedule[i];
       final originalStop = stops.firstWhere(
-        (s) => s.location.id == scheduleItem.location.id,
+        (s) => s.location?.id == scheduleItem.location?.id,
       );
 
       newStops.add(originalStop.copyWith(
@@ -263,6 +264,7 @@ class TripProvider extends ChangeNotifier {
       locations: locations,
       startTime: _dailyStartTimes[day] ?? '08:00',
       bufferMinutes: _bufferMin,
+      endTime: _dailyEndTimes[day] ?? '18:00',
     );
 
     return ItineraryOptimizer.getOptimizationSuggestions(schedule);

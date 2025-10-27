@@ -1,29 +1,74 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:geolocator/geolocator.dart';
 import '../models/trip.dart';
 
-/// Service for live tracking of itinerary execution
+/// Service for live tracking of itinerary execution with GPS
 class LiveTrackingService {
   static final LiveTrackingService _instance = LiveTrackingService._internal();
   factory LiveTrackingService() => _instance;
   LiveTrackingService._internal();
 
   Timer? _trackingTimer;
+  StreamSubscription<Position>? _positionSubscription;
   int _currentStopIndex = 0;
   Trip? _currentTrip;
+  Position? _currentPosition;
   final StreamController<TrackingUpdate> _trackingController =
       StreamController.broadcast();
 
-  /// Start tracking a trip
-  void startTracking(Trip trip) {
+  /// Start tracking a trip with GPS
+  Future<void> startTracking(Trip trip) async {
     _currentTrip = trip;
     _currentStopIndex = 0;
+
+    // Request location permission
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _trackingController.add(TrackingUpdate(
+        type: TrackingType.error,
+        message: 'Location services are disabled',
+        currentStop: null,
+        nextStop: null,
+        timeRemaining: 0,
+      ));
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _trackingController.add(TrackingUpdate(
+          type: TrackingType.error,
+          message: 'Location permissions are denied',
+          currentStop: null,
+          nextStop: null,
+          timeRemaining: 0,
+        ));
+        return;
+      }
+    }
+
+    // Start GPS tracking
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // 10 meters
+      ),
+    ).listen((Position position) {
+      _currentPosition = position;
+      _updateTrackingWithGPS();
+    });
 
     // Start periodic tracking updates
     _trackingTimer?.cancel();
     _trackingTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       _updateTracking();
     });
+
+    // Get initial position
+    _currentPosition = await Geolocator.getCurrentPosition();
 
     _trackingController.add(TrackingUpdate(
       type: TrackingType.tripStarted,
@@ -34,12 +79,44 @@ class LiveTrackingService {
     ));
   }
 
+  /// Update tracking with GPS data
+  void _updateTrackingWithGPS() {
+    if (_currentPosition != null && _currentTrip != null) {
+      final currentStop = _getCurrentStop();
+      if (currentStop != null) {
+        // Calculate distance to current destination
+        final distance = Geolocator.distanceBetween(
+          _currentPosition!.latitude,
+          _currentPosition!.longitude,
+          currentStop.location.lat,
+          currentStop.location.lon,
+        );
+
+        // Estimate time to destination based on distance
+        // This could be used for future ETA predictions
+
+        _trackingController.add(TrackingUpdate(
+          type: TrackingType.locationUpdate,
+          message:
+              'GPS updated - ${(distance / 1000).toStringAsFixed(1)} km to destination',
+          currentStop: currentStop,
+          nextStop: _getNextStop(),
+          timeRemaining: _getTimeRemaining(),
+          distanceToNext: distance,
+        ));
+      }
+    }
+  }
+
   /// Stop tracking
   void stopTracking() {
     _trackingTimer?.cancel();
     _trackingTimer = null;
+    _positionSubscription?.cancel();
+    _positionSubscription = null;
     _currentTrip = null;
     _currentStopIndex = 0;
+    _currentPosition = null;
   }
 
   /// Confirm arrival at current location
@@ -189,6 +266,7 @@ class TrackingUpdate {
   final TripStop? currentStop;
   final TripStop? nextStop;
   final int timeRemaining;
+  final double? distanceToNext; // in meters
 
   TrackingUpdate({
     required this.type,
@@ -196,6 +274,7 @@ class TrackingUpdate {
     required this.currentStop,
     required this.nextStop,
     required this.timeRemaining,
+    this.distanceToNext,
   });
 }
 
@@ -207,4 +286,6 @@ enum TrackingType {
   timeToMove,
   warning,
   tripCompleted,
+  locationUpdate,
+  error,
 }

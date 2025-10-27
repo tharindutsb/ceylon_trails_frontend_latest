@@ -71,6 +71,10 @@ class LocationItem {
   final int? voteCount;
   final String? city;
 
+  /// GPS coordinates
+  final double lat;
+  final double lon;
+
   /// A suggested duration you might show in Review & Predict (minutes)
   final int suggestedDurationMin;
 
@@ -88,6 +92,8 @@ class LocationItem {
     this.rating,
     this.voteCount,
     this.city,
+    this.lat = 7.2906, // Default Kandy coordinates
+    this.lon = 80.6337,
     this.suggestedDurationMin = 90,
   });
 
@@ -105,6 +111,8 @@ class LocationItem {
     double? rating,
     int? voteCount,
     String? city,
+    double? lat,
+    double? lon,
     int? suggestedDurationMin,
   }) {
     return LocationItem(
@@ -121,6 +129,8 @@ class LocationItem {
       rating: rating ?? this.rating,
       voteCount: voteCount ?? this.voteCount,
       city: city ?? this.city,
+      lat: lat ?? this.lat,
+      lon: lon ?? this.lon,
       suggestedDurationMin: suggestedDurationMin ?? this.suggestedDurationMin,
     );
   }
@@ -139,6 +149,8 @@ class LocationItem {
         'rating': rating,
         'voteCount': voteCount,
         'city': city,
+        'lat': lat,
+        'lon': lon,
         'suggestedDurationMin': suggestedDurationMin,
       };
 
@@ -156,6 +168,8 @@ class LocationItem {
         rating: (m['rating'] as num?)?.toDouble(),
         voteCount: (m['voteCount'] as num?)?.toInt(),
         city: m['city'] as String?,
+        lat: (m['lat'] as num?)?.toDouble() ?? 7.2906,
+        lon: (m['lon'] as num?)?.toDouble() ?? 80.6337,
         suggestedDurationMin:
             (m['suggestedDurationMin'] as num?)?.toInt() ?? 90,
       );
